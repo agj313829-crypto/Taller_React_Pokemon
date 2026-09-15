@@ -181,23 +181,6 @@ export const RegistroUsuario: React.FC = () => {
 
           <button type="submit">Enviar</button>
         </form>
-
-        <aside
-          style={{
-            border: '1px solid #dfe3e8',
-            borderRadius: 12,
-            padding: '1rem',
-            background: '#f6f8ff',
-          }}
-        >
-          <h3>Autoayuda de IA</h3>
-          <ul style={{ paddingLeft: '1.2rem', margin: 0, lineHeight: 1.8 }}>
-            <li>Usa un correo válido para recuperar tu perfil.</li>
-            <li>Verifica que el número de documento coincida con tu identidad.</li>
-            <li>Selecciona tu país y ciudad antes de guardar.</li>
-            <li>Si tienes dudas, revisa el formato de fecha y documento.</li>
-          </ul>
-        </aside>
       </div>
     </div>
   );
