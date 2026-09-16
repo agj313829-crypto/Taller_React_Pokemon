@@ -3,71 +3,88 @@ import { usePokemon, type PokemonTarjeta } from '../context/PokemonContext';
 
 export const BuscadorPokemon: React.FC = () => {
   const { entrenadorActivo, guardarPokemonMochila } = usePokemon();
+
   const [busqueda, setBusqueda] = useState('');
-  const [pokemon, setPokemon] = useState<PokemonTarjeta | null>(null);
+  const [pokemonActual, setPokemonActual] = useState<PokemonTarjeta | null>(null);
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
   const [cargando, setCargando] = useState(false);
-  const [error, setError] = useState('');
-  const [guardado, setGuardado] = useState(false);
 
-  const buscarPokemon = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    const nombre = busqueda.trim().toLowerCase();
+  const buscarPokemon = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (!nombre) return;
+    const query = busqueda.trim().toLowerCase();
+    if (!query) return;
 
     setCargando(true);
-    setError('');
-    setPokemon(null);
-    setGuardado(false);
+    setMensajeError(null);
 
     try {
-      const respuesta = await fetch(`https://pokeapi.co/api/v2/pokemon/${nombre}`);
-      if (!respuesta.ok) throw new Error('No se encontró el Pokémon.');
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+      if (!res.ok) throw new Error('Auxilio, socorro, no hay Pokémon.');
 
-      const datos = await respuesta.json();
-      setPokemon({
+      const datos = await res.json();
+      const pokemonEncontrado: PokemonTarjeta = {
         id: datos.id,
-        name: datos.name,
-        image: datos.sprites.front_default ?? '',
-        type: datos.types[0]?.type.name ?? 'Desconocido',
-        baseExperience: String(datos.base_experience ?? 0),
+        name: datos.name.toUpperCase(),
+        image: datos.sprites?.front_default ?? '',
+        type: datos.types?.[0]?.type?.name ?? 'Desconocido',
+        baseExperience: datos.base_experience,
         esFavorito: false,
-      });
-    } catch (searchError) {
-      setError(searchError instanceof Error ? searchError.message : 'No se pudo realizar la búsqueda.');
+      };
+
+      setPokemonActual(pokemonEncontrado);
+
+      if (!entrenadorActivo) {
+        setMensajeError('Debes registrar y activar un entrenador antes de guardar un Pokémon.');
+        return;
+      }
+
+      guardarPokemonMochila(pokemonEncontrado);
+      alert(`El Pokémon ${pokemonEncontrado.name} fue agregado a la mochila de ${entrenadorActivo.nombreCompleto}`);
+    } catch (error: any) {
+      setPokemonActual(null);
+      setMensajeError(error.message ?? 'No se pudo buscar el Pokémon.');
     } finally {
       setCargando(false);
     }
   };
 
-  const guardarPokemon = () => {
-    if (!pokemon || !entrenadorActivo) return;
-    guardarPokemonMochila(pokemon);
-    setGuardado(true);
-  };
-
   return (
     <div>
-      <h2>Buscar Pokémon</h2>
+      <div>
+        {entrenadorActivo ? (
+          <p>
+            Mochila Activa de: <strong>{entrenadorActivo.nombreCompleto}</strong>
+          </p>
+        ) : (
+          <p>No hay entrenador activo. Ve al formulario de Registro para activarlo.</p>
+        )}
+      </div>
+
       <form onSubmit={buscarPokemon}>
-        <label htmlFor="busqueda">Nombre o número:</label>
-        <input id="busqueda" value={busqueda} onChange={(event) => setBusqueda(event.target.value)} placeholder="Ej: pikachu" />
-        <button type="submit" disabled={cargando}>{cargando ? 'Buscando...' : 'Buscar'}</button>
+        <div>
+          <label htmlFor="pokemon-busqueda">Buscar Pokémon</label>
+          <input
+            id="pokemon-busqueda"
+            type="text"
+            value={busqueda}
+            onChange={(e) => setBusqueda(e.target.value)}
+            placeholder="Ej: Pikachu, charmander"
+          />
+        </div>
+        <button type="submit" disabled={cargando}>
+          {cargando ? 'Escaneando...' : 'Buscar'}
+        </button>
       </form>
 
-      {error && <p>{error}</p>}
-      {pokemon && (
-        <article>
-          {pokemon.image && <img src={pokemon.image} alt={pokemon.name} />}
-          <h3>{pokemon.name}</h3>
-          <p>Tipo: {pokemon.type}</p>
-          <p>Experiencia base: {pokemon.baseExperience}</p>
-          <button type="button" onClick={guardarPokemon} disabled={!entrenadorActivo || guardado}>
-            {guardado ? 'Guardado' : entrenadorActivo ? 'Guardar en inventario' : 'Registra un entrenador primero'}
-          </button>
-        </article>
+      {mensajeError && <p role="alert">{mensajeError}</p>}
+
+      {pokemonActual && (
+        <div>
+          <h3>{pokemonActual.name}</h3>
+          {pokemonActual.image && <img src={pokemonActual.image} alt={pokemonActual.name} />}
+        </div>
       )}
     </div>
   );
 };
-
