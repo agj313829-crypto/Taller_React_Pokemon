@@ -1,36 +1,58 @@
 import React from 'react';
-import { usePokemon } from '../context/PokemonContext';
+import {usePokemon } from '../context/PokemonContext'
 
-export const InventarioPokemon: React.FC = () => {
-  const { entrenadorActivo, mochilaActual, actualizarFavorito, eliminarPokemon } = usePokemon();
+export const InventarioPokemon: React.FC = () =>{
 
-  return (
-    <div>
-      <h2>Inventario Pokémon</h2>
+    const { entrenadorActivo, eliminarPokemon, actualizarFavorito, mochilaActual } = usePokemon();
 
-      {!entrenadorActivo ? (
-        <p>Registra un entrenador para ver su inventario.</p>
-      ) : mochilaActual.length === 0 ? (
-        <p>Tu inventario está vacío. Busca un Pokémon para guardarlo.</p>
-      ) : (
-        <div>
-          {mochilaActual.map((pokemon) => (
-            <article key={pokemon.id}>
-              {pokemon.image && <img src={pokemon.image} alt={pokemon.name} />}
-              <h3>{pokemon.name}</h3>
-              <p>Tipo: {pokemon.type}</p>
-              <p>Experiencia base: {pokemon.baseExperience}</p>
-              <button type="button" onClick={() => actualizarFavorito(pokemon.id)}>
-                {pokemon.esFavorito ? 'Quitar favorito' : 'Marcar favorito'}
+
+        if(!entrenadorActivo){
+          return(
+            <div>
+              <h3> No Hay Entrenador </h3>
+              <p>Por favor asigne <strong>entrenador activo</strong> o <strong>registre un entrenador</strong></p>
+            </div>
+          );}
+  
+
+
+return(
+<div className=" banner-seccion"> 
+    <header>
+      <h2> mochila de {entrenadorActivo.nombreCompleto}</h2>
+    </header>
+    <div className="grid-mochila">
+      {mochilaActual.length >0 ? (
+        mochilaActual.map((poke, index) => (
+          <div key={poke.id} className={`tarjeta-item ${poke.esFavorito? 'tarjeta-favorita' : ''}`}>
+            <span>
+              #{index +1} de {mochilaActual.length}
+            </span>
+            <img src={poke.image}/>
+            <h4>{poke.name}</h4>
+            <p>{poke.type}</p>
+            <div className="panel-botones">
+              <button className={`btn-favorito ${poke.esFavorito ? 'fav-activo' : ''}`}
+                onClick={() => actualizarFavorito(poke.id)}>
+                {poke.esFavorito ? '🌟⭐Favorito' : '🌟Marcar'}
               </button>
-              <button type="button" onClick={() => eliminarPokemon(pokemon.id)}>
-                Eliminar
+              <button type="button" className="btn-eliminar" 
+              onClick={() => eliminarPokemon(poke.id)}>
+                liberar o soltar
               </button>
-            </article>
-          ))}
-        </div>
-      )}
+            </div>
+          </div>
+        ))
+        ) : (
+          <div>
+            <p> Tu moochila esta vacia actualmente.</p>
+            <p>vaya y capture pokemon , sokunocio</p>
+          </div>
+        )
+      }
     </div>
-  );
-};
 
+    
+</div>
+);
+};
