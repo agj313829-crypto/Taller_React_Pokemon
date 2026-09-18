@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { usePokemon, type Usuario } from '../context/PokemonContext';
+import '../styles/pokerosa.css';
 
 export const RegistroUsuario: React.FC = () => {
   const { entrenadores, entrenadorActivo, seleccionarEntrenador, resgistrarEntrenador } = usePokemon();
@@ -62,15 +63,15 @@ export const RegistroUsuario: React.FC = () => {
   };
 
   return (
-    <div style={{ maxWidth: 1000, margin: '2rem auto', display: 'grid', gap: '1.5rem' }}>
+    <div className="page-wrap card-surface">
       <header>
         <h2>Registro de entrenadores</h2>
       </header>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '2fr 1fr', gap: '1.5rem' }}>
-        <form onSubmit={handleSubmit} style={{ display: 'grid', gap: '1rem' }}>
-          <div>
-            <label htmlFor="nombre">Nombre:</label>
+      <div className="register-layout">
+        <form onSubmit={handleSubmit}>
+          <div className="field">
+            <label htmlFor="nombre">Nombre</label>
             <input
               id="nombre"
               name="nombre"
@@ -82,8 +83,8 @@ export const RegistroUsuario: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="apellido">Apellido:</label>
+          <div className="field">
+            <label htmlFor="apellido">Apellido</label>
             <input
               id="apellido"
               name="apellido"
@@ -95,8 +96,8 @@ export const RegistroUsuario: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="tipoDoc">Tipo de identificación:</label>
+          <div className="field">
+            <label htmlFor="tipoDoc">Tipo de identificación</label>
             <select id="tipoDoc" name="tipoDoc" value={formData.tipoDoc} onChange={handleChange} required>
               <option value="">Seleccione una opción</option>
               <option value="Cédula de Ciudadanía">Cédula de Ciudadanía</option>
@@ -106,8 +107,8 @@ export const RegistroUsuario: React.FC = () => {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="dni">Número de identificación:</label>
+          <div className="field">
+            <label htmlFor="dni">Número de identificación</label>
             <input
               id="dni"
               name="dni"
@@ -119,8 +120,8 @@ export const RegistroUsuario: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="fechaNacimiento">Fecha de nacimiento:</label>
+          <div className="field">
+            <label htmlFor="fechaNacimiento">Fecha de nacimiento</label>
             <input
               id="fechaNacimiento"
               name="fechaNacimiento"
@@ -131,8 +132,8 @@ export const RegistroUsuario: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="correo">Correo electrónico:</label>
+          <div className="field">
+            <label htmlFor="correo">Correo electrónico</label>
             <input
               id="correo"
               name="correo"
@@ -144,8 +145,8 @@ export const RegistroUsuario: React.FC = () => {
             />
           </div>
 
-          <div>
-            <label htmlFor="pais">País:</label>
+          <div className="field">
+            <label htmlFor="pais">País</label>
             <select id="pais" name="pais" value={formData.pais} onChange={handleChange} required>
               <option value="">Seleccionar</option>
               <option value="Colombia">Colombia</option>
@@ -154,8 +155,8 @@ export const RegistroUsuario: React.FC = () => {
             </select>
           </div>
 
-          <div>
-            <label htmlFor="ciudad">Ciudad:</label>
+          <div className="field">
+            <label htmlFor="ciudad">Ciudad</label>
             <select id="ciudad" name="ciudad" value={formData.ciudad} onChange={handleChange} required>
               <option value="">Seleccione una opción</option>
               <option value="Bogotá">Bogotá</option>
@@ -166,47 +167,42 @@ export const RegistroUsuario: React.FC = () => {
             </select>
           </div>
 
-          <div>
-            <label>
-              <input
-                type="checkbox"
-                name="aceptaPolitica"
-                checked={formData.aceptaPolitica}
-                onChange={handleChange}
-                required
-              />
-              Acepto la política de tratamiento de datos.
-            </label>
-          </div>
+          <label className="checkbox-field">
+            <input
+              type="checkbox"
+              name="aceptaPolitica"
+              checked={formData.aceptaPolitica}
+              onChange={handleChange}
+              required
+            />
+            Acepto la política de tratamiento de datos.
+          </label>
 
-          <button type="submit">Enviar</button>
+          <div className="form-actions">
+            <button type="submit" className="btn btn-primary btn-block">
+              Enviar
+            </button>
+          </div>
         </form>
-      </div>
 
-      {entrenadores.length > 0 && (
-        <div>
-          <h3>Cambiar Entrenador</h3>
-          <div>
-            {entrenadores.map((user) => (
-              <button
-                key={user.id}
-                type="button"
-                onClick={() => seleccionarEntrenador(user)}
-                style={{
-                  backgroundColor: entrenadorActivo?.id === user.id ? '#FF00FF' : '#e0e0e0',
-                  color: entrenadorActivo?.id === user.id ? 'white' : 'black',
-                  padding: '6px 12px',
-                  border: 'none',
-                  borderRadius: '4px',
-                  cursor: 'pointer',
-                }}
-              >
-                {user.nombreCompleto}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
+        {entrenadores.length > 0 && (
+          <aside className="card-surface">
+            <h3>Cambiar entrenador</h3>
+            <div className="trainer-switch">
+              {entrenadores.map((user) => (
+                <button
+                  key={user.id}
+                  type="button"
+                  onClick={() => seleccionarEntrenador(user)}
+                  className={`btn btn-sm ${entrenadorActivo?.id === user.id ? 'btn-primary' : 'btn-secondary'}`}
+                >
+                  {user.nombreCompleto}
+                </button>
+              ))}
+            </div>
+          </aside>
+        )}
+      </div>
     </div>
   );
 };

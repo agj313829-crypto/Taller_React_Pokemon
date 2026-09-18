@@ -65,33 +65,42 @@ export const PokemonProvider: React.FC<{ children: React.ReactNode }> = ({ child
   };
 
   const resgistrarEntrenador = (nuevoUsuario: Usuario) => {
-    const actualizados = [...entrenadores, nuevoUsuario];
-    setEntrenadores(actualizados);
-    localStorage.setItem('lista_entrenadores', JSON.stringify(actualizados));
+    setEntrenadores((prev) => {
+      const actualizados = [...prev, nuevoUsuario];
+      localStorage.setItem('lista_entrenadores', JSON.stringify(actualizados));
+      return actualizados;
+    });
     seleccionarEntrenador(nuevoUsuario);
   };
 
   const guardarPokemonMochila = (pokemon: PokemonTarjeta) => {
     if (!entrenadorActivo) return;
-    const actualizada = [...mochilaActual, { ...pokemon, esFavorito: false }];
-    setMochilaActual(actualizada);
-    localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+
+    setMochilaActual((prev) => {
+      const actualizada = [...prev, { ...pokemon, esFavorito: false }];
+      localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+      return actualizada;
+    });
   };
 
   const actualizarFavorito = (pokemonId: number) => {
     if (!entrenadorActivo) return;
-    const actualizada = mochilaActual.map((pokemon) =>
-      pokemon.id === pokemonId ? { ...pokemon, esFavorito: !pokemon.esFavorito } : pokemon,
-    );
-    setMochilaActual(actualizada);
-    localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+    setMochilaActual((prev) => {
+      const actualizada = prev.map((pokemon) =>
+        pokemon.id === pokemonId ? { ...pokemon, esFavorito: !pokemon.esFavorito } : pokemon,
+      );
+      localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(actualizada));
+      return actualizada;
+    });
   };
 
   const eliminarPokemon = (pokemonId: number) => {
     if (!entrenadorActivo) return;
-    const filtrado = mochilaActual.filter((pokemon) => pokemon.id !== pokemonId);
-    setMochilaActual(filtrado);
-    localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(filtrado));
+    setMochilaActual((prev) => {
+      const filtrado = prev.filter((pokemon) => pokemon.id !== pokemonId);
+      localStorage.setItem(`mochila_${entrenadorActivo.id}`, JSON.stringify(filtrado));
+      return filtrado;
+    });
   };
 
   return (

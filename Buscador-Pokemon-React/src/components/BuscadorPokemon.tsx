@@ -1,107 +1,112 @@
 import React, { useState } from 'react';
-import {usePokemon, type PokemonTarjeta } from '../context/PokemonContext'
+import { usePokemon, type PokemonTarjeta } from '../context/PokemonContext';
+import '../styles/pokerosa.css';
 
-export const BuscadorPokemon: React.FC = () =>{
+export const BuscadorPokemon: React.FC = () => {
+  const { entrenadorActivo, guardarPokemonMochila } = usePokemon();
 
-    const { entrenadorActivo, guardarPokemonMochila } = usePokemon();
+  const [busqueda, setBusqueda] = useState('');
+  const [pokemonActual, setPokemonActual] = useState<PokemonTarjeta | null>(null);
+  const [mensajeError, setMensajeError] = useState<string | null>(null);
+  const [cargando, setCargando] = useState(false);
 
-    const [busqueda, setBusqueda] = useState('');
-    const [pokemonActual, setPokemonActual] = useState<PokemonTarjeta | null>(null);
-    const [mensajeError, setMensajeError] = useState<string | null>(null);
-    const [cargando, setCargando] = useState(false);
+  const buscarPokemon = async (e: React.FormEvent) => {
+    e.preventDefault();
 
-    const buscarPokemon = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const query = busqueda.trim().toLowerCase();
 
-        const query = busqueda.trim().toLowerCase();
+    if (!query) return;
 
-        if(!query) return;
+    setCargando(true);
+    setMensajeError(null);
 
-        setCargando(true);
-        setMensajeError(null);
+    try {
+      const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
+      if (!res.ok) throw new Error('Auxilio, Socorro, no hay Pokemon');
 
-        try {
-            const res = await fetch(`https://pokeapi.co/api/v2/pokemon/${query}`);
-            if(!res.ok) throw new Error('Auxilio, Socorro, no hay Pokemon');
-
-            const datos = await res.json();
-            setPokemonActual({
-                id: datos.id,
-                name: datos.name.toUpperCase(),
-                image: datos.sprites.front_default,
-                type: datos.types[0].type.name,
-                baseExperience: datos.base_experience,
-                esFavorito: false
-            });
-        } catch (error: any) {
-            setPokemonActual(null);
-            setMensajeError(error.message);
-        } finally {
-            setCargando(false);
-        }
-
-    };
-    const clickGuardar =() =>{
-
-        if(!entrenadorActivo){
-            alert('Debes seleccionar o registrar un entrenador');
-        }
-
-
-
-        if(pokemonActual){
-            guardarPokemonMochila(pokemonActual);
-            alert(`El Pokemon ${pokemonActual.name} es guardado en la mochila de ${entrenadorActivo?.nombreCompleto}`);
+      const datos = await res.json();
+      setPokemonActual({
+        id: datos.id,
+        name: datos.name.toUpperCase(),
+        image: datos.sprites.front_default,
+        type: datos.types[0].type.name,
+        baseExperience: datos.base_experience,
+        esFavorito: false,
+      });
+    } catch (error: any) {
+      setPokemonActual(null);
+      setMensajeError(error.message);
+    } finally {
+      setCargando(false);
     }
+  };
+
+  const clickGuardar = () => {
+    if (!entrenadorActivo) {
+      alert('Debes seleccionar o registrar un entrenador');
+      return;
     }
 
+    if (pokemonActual) {
+      guardarPokemonMochila(pokemonActual);
+      alert(`El Pokemon ${pokemonActual.name} es guardado en la mochila de ${entrenadorActivo.nombreCompleto}`);
+    }
+  };
 
+  return (
+    <div className="page-wrap card-surface">
+      {entrenadorActivo ? (
+        <p className="search-status">
+          Mochila activa de: <strong>{entrenadorActivo.nombreCompleto}</strong>
+        </p>
+      ) : (
+        <p className="search-status">
+          No hay entrenador activo. Ve al formulario de registro para activarlo, socio.
+        </p>
+      )}
 
-return(
-<div className=" ">
-    <div>
-        {entrenadorActivo ? (
-            <p>Mochila Activa de: <strong>{entrenadorActivo.nombreCompleto}</strong></p>
-        ) : (
-            <p>No hay entrenador Activo. Ve al formulario de Registro para activarlo, socio.</p>
-        )}
-    </div><form onSubmit={buscarPokemon}>
-            <div>
-                <label>Buscar Pokemon</label>
-                <input type="text" value={busqueda} onChange={(e) => setBusqueda(e.target.value)}></input>
-            </div>
-            <button type='submit' disabled={cargando}> {cargando ? 'Escaneando...' : 'Buscar'}
-            </button>
-        </form>
+      <form onSubmit={buscarPokemon} className="field">
+        <label htmlFor="busqueda">Buscar Pokémon</label>
+        <input
+          id="busqueda"
+          type="text"
+          value={busqueda}
+          onChange={(e) => setBusqueda(e.target.value)}
+          placeholder="Ej: pikachu"
+        />
+        <div className="form-actions">
+          <button type="submit" className="btn btn-primary btn-block" disabled={cargando}>
+            {cargando ? 'Escaneando...' : 'Buscar'}
+          </button>
+        </div>
+      </form>
 
+      {mensajeError && <div className="alert alert-error">{mensajeError}</div>}
 
       {pokemonActual && (
-    <div>
-        <h3>{pokemonActual.name}</h3>
-        <img src={pokemonActual.image}></img>
-        <p>
-            Elemento: {''}
-            <span style={{
-                backgroundColor:
-                    pokemonActual.type === 'fire' ? '#ff0000' : 
-                    pokemonActual.type === 'water' ? '#3cb7e7' :
-                    pokemonActual.type === 'grass' ? '#3ce775' :
-                    pokemonActual.type === 'electric' ? '#f0e440' : '#e18de4',
-                color: 'white',
-                padding: '3px 8px',
-                borderRadius: '10px',
-                border: '2px solid #000000',
-            }}>
+        <div className="search-result">
+          <div className="pokemon-card">
+            <img className="pokemon-sprite" src={pokemonActual.image} alt={pokemonActual.name} />
+            <div className="pokemon-name">{pokemonActual.name}</div>
+            <div className="pokemon-types">
+              <span className={`type-chip type-${pokemonActual.type}`}>
                 {pokemonActual.type.toLocaleUpperCase()}
-
-            </span>
-        </p>
-        <p>Experiencia Base: <strong>{pokemonActual.baseExperience}</strong></p>
-        <button type="button" className="btn-capturar" onClick={clickGuardar} disabled={!entrenadorActivo}>
-            Guardar en la Mochila</button>
-
+              </span>
+            </div>
+            <p className="card-index">
+              Experiencia base: <strong>{pokemonActual.baseExperience}</strong>
+            </p>
+            <button
+              type="button"
+              className="btn btn-primary btn-sm btn-block"
+              onClick={clickGuardar}
+              disabled={!entrenadorActivo}
+            >
+              Guardar en la mochila
+            </button>
+          </div>
+        </div>
+      )}
     </div>
-)}
-</div>
-);
+  );
 };

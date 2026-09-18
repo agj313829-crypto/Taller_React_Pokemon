@@ -1,58 +1,60 @@
 import React from 'react';
-import {usePokemon } from '../context/PokemonContext'
+import { usePokemon } from '../context/PokemonContext';
+import '../styles/pokerosa.css';
 
-export const InventarioPokemon: React.FC = () =>{
+export const InventarioPokemon: React.FC = () => {
+  const { entrenadorActivo, eliminarPokemon, actualizarFavorito, mochilaActual } = usePokemon();
 
-    const { entrenadorActivo, eliminarPokemon, actualizarFavorito, mochilaActual } = usePokemon();
+  if (!entrenadorActivo) {
+    return (
+      <div className="notice-box">
+        <h3>No hay entrenador</h3>
+        <p>
+          Por favor asigna un <strong>entrenador activo</strong> o <strong>registra un entrenador</strong>.
+        </p>
+      </div>
+    );
+  }
 
+  return (
+    <div className="page-wrap card-surface">
+      <header>
+        <h2>Mochila de {entrenadorActivo.nombreCompleto}</h2>
+      </header>
 
-        if(!entrenadorActivo){
-          return(
-            <div>
-              <h3> No Hay Entrenador </h3>
-              <p>Por favor asigne <strong>entrenador activo</strong> o <strong>registre un entrenador</strong></p>
+      <div className="pokemon-grid">
+        {mochilaActual.length > 0 ? (
+          mochilaActual.map((poke, index) => (
+            <div key={poke.id} className={`pokemon-card ${poke.esFavorito ? 'is-favorite' : ''}`}>
+              <span className="card-index">
+                #{index + 1} de {mochilaActual.length}
+              </span>
+              <img className="pokemon-sprite" src={poke.image} alt={poke.name} />
+              <div className="pokemon-name">{poke.name}</div>
+              <div className="pokemon-types">
+                <span className={`type-chip type-${poke.type}`}>{poke.type}</span>
+              </div>
+              <div className="panel-botones">
+                <button
+                  type="button"
+                  className={`btn btn-sm ${poke.esFavorito ? 'btn-primary' : 'btn-secondary'}`}
+                  onClick={() => actualizarFavorito(poke.id)}
+                >
+                  {poke.esFavorito ? '⭐ Favorito' : '☆ Marcar'}
+                </button>
+                <button type="button" className="btn btn-danger btn-sm" onClick={() => eliminarPokemon(poke.id)}>
+                  Liberar
+                </button>
+              </div>
             </div>
-          );}
-  
-
-
-return(
-<div className=" banner-seccion"> 
-    <header>
-      <h2> mochila de {entrenadorActivo.nombreCompleto}</h2>
-    </header>
-    <div className="grid-mochila">
-      {mochilaActual.length >0 ? (
-        mochilaActual.map((poke, index) => (
-          <div key={poke.id} className={`tarjeta-item ${poke.esFavorito? 'tarjeta-favorita' : ''}`}>
-            <span>
-              #{index +1} de {mochilaActual.length}
-            </span>
-            <img src={poke.image}/>
-            <h4>{poke.name}</h4>
-            <p>{poke.type}</p>
-            <div className="panel-botones">
-              <button className={`btn-favorito ${poke.esFavorito ? 'fav-activo' : ''}`}
-                onClick={() => actualizarFavorito(poke.id)}>
-                {poke.esFavorito ? '🌟⭐Favorito' : '🌟Marcar'}
-              </button>
-              <button type="button" className="btn-eliminar" 
-              onClick={() => eliminarPokemon(poke.id)}>
-                liberar o soltar
-              </button>
-            </div>
-          </div>
-        ))
+          ))
         ) : (
-          <div>
-            <p> Tu moochila esta vacia actualmente.</p>
-            <p>vaya y capture pokemon , sokunocio</p>
+          <div className="empty-state">
+            <p>Tu mochila está vacía por ahora.</p>
+            <p>Ve a "Buscar Pokémon" y captura alguno.</p>
           </div>
-        )
-      }
+        )}
+      </div>
     </div>
-
-    
-</div>
-);
+  );
 };
